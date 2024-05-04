@@ -1,0 +1,40 @@
+Task 5
+.
+.
+.
+.
+.
+import requests          
+from bs4 import BeautifulSoup
+import csv
+
+# URL of the e-commerce website
+url = 'https://www.amazon.in/?&tag=googhydrabk1-21&ref=pd_sl_7hz2t19t5c_e&adgrpid=155259815513&hvpone=&hvptwo=&hvadid=674842289437&hvpos=&hvnetw=g&hvrand=4974248201939429853&hvqmt=e&hvdev=c&hvdvcmdl=&hvlocint=&hvlocphy=9040235&hvtargid=kwd-10573980&hydadcr=14453_2316415&gad_source=1'
+
+# Send a GET request to the URL
+response = requests.get(url)
+
+# Parse the HTML content of the page
+soup = BeautifulSoup(response.text, 'html.parser')
+
+# Extract product information
+products = []
+for product in soup.find_all('div', {'data-component-type': 's-search-result'}):
+    name = product.find('span', {'class': 'a-text-normal'}).text.strip()
+    price = product.find('span', {'class': 'a-price'}).find('span', {'class': 'a-offscreen'}).text.strip()
+    rating = product.find('span', {'class': 'a-icon-alt'})
+    rating = rating.text.strip() if rating else 'N/A'
+    products.append({
+        'Name': name,
+        'Price': price,
+        'Rating': rating
+    })
+
+# Write product information to a CSV file
+with open('products.csv', mode='w', newline='') as file:
+    writer = csv.DictWriter(file, fieldnames=['Name', 'Price', 'Rating'])
+    writer.writeheader()
+    for product in products:
+        writer.writerow(product)
+
+print('Scraping and writing to CSV file completed.')
